@@ -4,17 +4,16 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 import plotly.express as px
-import xgboost as xgb  # Using XGBoost with CUDA
+import xgboost as xgb  
 from datetime import datetime
 import os
-import joblib  # Fix for scaler loading issue
+import joblib  
 
 MODEL_FILE = "fraud_model.json"
 SCALER_FILE = "scaler.pkl"
 FEATURES_FILE = "feature_columns.npy"
 
 
-# Load dataset
 @st.cache_data
 def load_data():
     if not os.path.exists(r"C:\Users\sanka\PycharmProjects\fintekathon\data\fraudTest.csv"):
@@ -61,14 +60,14 @@ def train_model(X, y):
         learning_rate=0.2,
         subsample=0.8,
         colsample_bytree=0.8,
-        tree_method="gpu_hist",  # Use GPU for training
+        tree_method="gpu_hist",  
         predictor="gpu_predictor",
         random_state=42
     )
     model.fit(X_train_scaled, y_train)
 
     model.save_model(MODEL_FILE)
-    joblib.dump(scaler, SCALER_FILE)  # Save entire scaler object
+    joblib.dump(scaler, SCALER_FILE)  
     np.save(FEATURES_FILE, np.array(feature_columns))
 
     return model, scaler
@@ -78,7 +77,7 @@ def load_model():
     if os.path.exists(MODEL_FILE) and os.path.exists(SCALER_FILE) and os.path.exists(FEATURES_FILE):
         model = xgb.XGBClassifier()
         model.load_model(MODEL_FILE)
-        scaler = joblib.load(SCALER_FILE)  # Load entire scaler object
+        scaler = joblib.load(SCALER_FILE)  
         feature_columns = np.load(FEATURES_FILE, allow_pickle=True).tolist()
         return model, scaler, feature_columns
     return None, None, None
